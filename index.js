@@ -74,6 +74,20 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/user-home',verifyJWT, async (req, res) => {
+      const email = req.query.email
+      const query = { email: email }
+      const payments = await paymentCollection.find(query).toArray()
+      const totalPrice = payments.reduce((sum, payment) => payment.price + sum, 0)
+      const totalMenu = payments.reduce((sum, item) => item.menuItems.length + sum, 0)
+      const result = {
+        totalMenu: totalMenu,
+        totalOrder: payments.length,
+        totalPayment: totalPrice
+      }
+      res.send(result)
+    })
+
     // check admin user
     // jwt security
     // check user token and user email are same
@@ -190,6 +204,14 @@ async function run() {
       const query = { _id: { $in: payment.cartItems.map(id => new ObjectId(id)) } }
       const deleteResult = await cartCollection.deleteMany(query)
       res.send({ insertResult, deleteResult });
+    })
+
+    // payment history api
+    app.get('/payment-history', verifyJWT, async (req, res) => {
+      const email = req.query.email
+      const query = { email: email };
+      const result = await paymentCollection.find(query).toArray()
+      res.send(result)
     })
 
     // admin stats
