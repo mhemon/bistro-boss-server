@@ -78,7 +78,7 @@ async function run() {
       const email = req.query.email
       const query = { email: email }
       const payments = await paymentCollection.find(query).toArray()
-      const totalPrice = payments.reduce((sum, payment) => payment.price + sum, 0)
+      const totalPrice = (payments.reduce((sum, payment) => payment.price + sum, 0)).toFixed(2)
       const totalMenu = payments.reduce((sum, item) => item.menuItems.length + sum, 0)
       const result = {
         totalMenu: totalMenu,
@@ -103,7 +103,7 @@ async function run() {
     })
 
     // make user admin
-    app.patch('/users/admin/:id', async (req, res) => {
+    app.patch('/users/admin/:id',verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id
       const filter = { _id: new ObjectId(id) }
       const updateDoc = {
@@ -221,7 +221,7 @@ async function run() {
       const products = await menuCollection.estimatedDocumentCount();
       const orders = await paymentCollection.estimatedDocumentCount();
       const payment = await paymentCollection.find().toArray();
-      const revenue = payment.reduce((sum, payment) => payment.price + sum, 0)
+      const revenue = (payment.reduce((sum, payment) => payment.price + sum, 0)).toFixed(2)
       res.send({
         revenue,
         users,
